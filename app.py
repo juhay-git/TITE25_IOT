@@ -1,8 +1,12 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, Response, stream_with_context
+import json
+import threading
 
 app = Flask(__name__)
 
 mittaustieto = list() # lista tietojen tallessapitämistä varten
+uusi_mittaus = None
+condition = threading.Condition()
 
 @app.route('/', methods =['GET']) # GET-päätepiste tietojen hakua varten
 def index():
@@ -11,10 +15,39 @@ def index():
 
 @app.route('/lisaa_tieto', methods=['POST']) # POST-päätepiste tietojen vastaanottamista varten
 def lisaa_tieto():
+    global uusi_mittaus
     vastaanotettu_data = request.get_json(force=True) #force=True -> tehdään vastaanotetusta JSONista dictionary joka tapauksessa
-    mittaustieto.append(vastaanotettu_data["mittaus"]) #lisätään vastaanotettu mittausarvo listaan
+    mittaus = vastaanotettu_data["mittaus"]
+
+    with condition:
+        mittaustieto.append(mittaus) #lisätään vastaanotettu mittausarvo listaan
+        uusi_mittaus = mittaus
+        condition.notify_all()
 
     return "ok"
+
+@app.route("/stream")
+def stream():
+    def event_stream():
+        while True:
+            with condition:
+                condition.wait()
+                data = uusi_mittaus
+
+            viesti = {
+                "mittaus":data
+            }
+            yield f"data: {json.dumps(viesti)}\n\n"
+    
+    return Response(
+        stream_with_context(event_stream()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control":"no-cache",
+            "Connection":"keep-alive"
+        }
+    )
+
 
 if __name__ == "__main__":
     app.run()

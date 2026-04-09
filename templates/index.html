@@ -8,14 +8,41 @@
 <body>
     <h1>Mittaukset</h1>
     <table>
-        <tr>
-            <th>Mittaus</th>
-        </tr>
-        {% for mittaus in taulukko %}
-        <tr>
-            <td>{{mittaus}}</td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>Mittaus</th>
+            </tr>
+        </thead>
+        <tbody id="mittaustaulukko">
+            {% for mittaus in taulukko %}
+            <tr>
+                <td>{{mittaus}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+
+    <script>
+        const mittaustaulukko = document.getElementById("mittaustaulukko");
+        const eventSource = new EventSource("/stream");
+
+        eventSource.onmessage = function(event) {
+            console.log(event)
+
+            const data = JSON.parse(event.data);
+
+            const uusirivi = document.createElement("tr");
+            const mittaussolu = document.createElement("td");
+            mittaussolu.textContent = data.mittaus;
+
+            uusirivi.appendChild(mittaussolu);
+            mittaustaulukko.appendChild(uusirivi);
+        };
+
+        eventSource.onerror = function() {
+            console.log("Virhe SSE-yhteydessä")
+        };
+    </script>
+
 </body>
 </html>
