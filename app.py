@@ -4,7 +4,7 @@ import threading
 
 app = Flask(__name__)
 
-mittaustieto = list() # lista tietojen tallessapitämistä varten
+mittaustieto = dict() # tähän vaihdettiin dictionary
 uusi_mittaus = None
 condition = threading.Condition()
 
@@ -20,7 +20,8 @@ def lisaa_tieto():
     mittaus = vastaanotettu_data["mittaus"]
 
     with condition:
-        mittaustieto.append(mittaus) #lisätään vastaanotettu mittausarvo listaan
+        #mittaustieto.append(mittaus) #lisätään vastaanotettu mittausarvo listaan
+        mittaustieto.update(mittaus) # nyt päivitetään dictionaryyn uusi avain/arvo pari
         uusi_mittaus = mittaus
         condition.notify_all()
 

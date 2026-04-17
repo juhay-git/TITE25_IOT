@@ -4,19 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mittaukset</title>
+
+    <style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f4f4f4;
+    }
+
+    tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    tr:hover {
+        background-color: #f1f7ff;
+    }
+</style>
+
 </head>
 <body>
     <h1>Mittaukset</h1>
     <table>
-        <thead>
-            <tr>
-                <th>Mittaus</th>
-            </tr>
-        </thead>
         <tbody id="mittaustaulukko">
-            {% for mittaus in taulukko %}
+            {% for avain, arvo in taulukko.items() %}
             <tr>
-                <td>{{mittaus}}</td>
+                <td>{{avain}}</td>
+                <td>{{arvo}}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -31,11 +54,21 @@
 
             const data = JSON.parse(event.data);
 
-            const uusirivi = document.createElement("tr");
-            const mittaussolu = document.createElement("td");
-            mittaussolu.textContent = data.mittaus;
+            const mittausObj = data.mittaus;
+            const aika = Object.keys(mittausObj)[0];
+            const lampotila = mittausObj[aika];
 
-            uusirivi.appendChild(mittaussolu);
+            const uusirivi = document.createElement("tr");
+
+            const aikasolu = document.createElement("td");
+            aikasolu.textContent = aika;
+
+            const lampotilasolu = document.createElement("td");
+            lampotilasolu.textContent = lampotila;
+
+            uusirivi.appendChild(aikasolu);
+            uusirivi.appendChild(lampotilasolu);
+
             mittaustaulukko.appendChild(uusirivi);
         };
 
