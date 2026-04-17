@@ -36,10 +36,10 @@
     <h1>Mittaukset</h1>
     <table>
         <tbody id="mittaustaulukko">
-            {% for avain, arvo in taulukko.items() %}
+            {% for rivi in taulukko %}
             <tr>
-                <td>{{avain}}</td>
-                <td>{{arvo}}</td>
+                <td>{{ rivi[0] }}</td>
+                <td>{{ rivi[1] }}</td>
             </tr>
             {% endfor %}
         </tbody>
